@@ -27,7 +27,7 @@ export default function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>humanized data rendering</h1>
+        <h1>re-humanized data rendering</h1>
         {(isLoadingCsv && !csvError) ? <Spinner /> : <Stories csv={csv} />}
         {csvError && <pre>{JSON.stringify({csvError}, null, 2)}</pre>}
       </header>
@@ -36,6 +36,7 @@ export default function App() {
 }
 
 function Stories({csv}) {
+  console.log(_.uniq(_.map(csv, 'TOP_CHARGE')).sort().join(","));
   const [record, setRecord] = useState(_.sample(csv));
   return (
     <div className="App-vertical-flex">
@@ -51,6 +52,10 @@ function Stories({csv}) {
 function Story({record}) {
   const [imgEl, setImgEl] = useState(null);
   // const [prediction, setPrediction] = useState(null);
+  // const jailText = {
+  //   'MAX': 'maximum security prison'
+  // }[record.CUSTODY_LEVEL] || 'prison';
+
   const introText = `I'm ${record.AGE} years old, and I've been in jail for the last ${differenceInDays(new Date(), parse(record.ADMITTED_DT))} days.`;
   const [imageUrl, setImageUrl] = useState(`https://thispersondoesnotexist.com/image?r=${Math.random()}`);
   
@@ -74,6 +79,7 @@ function Story({record}) {
     <div className="Story">
       <div className="Story-rendering">
         <div>{introText}</div>
+        {record.SRG_FLG === 'N' && <div>I've never been involved with a gang.</div>}
         <img
           key={imageUrl}
           ref={el => setImgEl(el)}
@@ -83,15 +89,17 @@ function Story({record}) {
           width="300"
           height="300"
         />
-        {record.SRG_FLG === 'N' && <div>I've never been involved with a gang.</div>}
-        <div>In prison I'm #{record.INMATEID}.</div>
+        
+        <div style={{marginTop: 20}}>In prison I'm #{record.INMATEID}.</div>
+        {record.BRADH === 'Y' && <div>In prison I'm under <a href="https://duckduckgo.com/?q=mental+observation+prison" target="_blank" rel="noopener noreferrer">mental observation</a>.</div>}
+        {record.CUSTODY_LEVEL === 'MAX' && <div>In prison I am in my cell 23 hours a day.</div>}
       </div>
       <div className="Story-source">
         <pre style={{background: 'black', color: 'lightgreen', padding: 20, marginLeft: 20, fontSize: 12}}>{JSON.stringify(record, null, 2).slice(1, -1)}</pre>
         <div style={{fontSize: 10, color: '#aaa'}}>
-        <div>Raw data from <a href="https://www.kaggle.com/new-york-city/ny-daily-inmates-in-custody">City of New York</a></div>
-          <div>Images from <a href="https://thispersondoesnotexist.com">thispersondoesnotexist.com</a></div>
-          <div>Text is generated from data, written by <a href="https://github.com/kevinrobinson">Kevin Robinson</a></div>
+        <div>Real NYC prison data from <a href="https://www.kaggle.com/new-york-city/ny-daily-inmates-in-custody">City of New York</a></div>
+          <div>Storytelling images generated from <a href="https://thispersondoesnotexist.com">thispersondoesnotexist.com</a></div>
+          <div>Storytelling text is generated from real data, written by <a href="https://github.com/kevinrobinson">Kevin Robinson</a></div>
         </div>
       </div>
     </div>
